@@ -1,0 +1,52 @@
+# -*- coding: utf-8 -*-
+import string # string import
+import urllib2 # url을 따오기 위한것
+source = urllib2.urlopen("www.example.com").read()
+
+temp = ""
+
+for i in range(0, len(source)):
+    if source[i] == '<':
+         for j in range(i, len(source)):
+            if source[j] == '>':
+                break
+  
+    elif i > j:
+        temp = temp + source[i]
+               
+s = temp.split()
+
+print "단어수: ", len(s)
+
+i = 0
+char = string.punctuation # 모든 구두점을 char에 저장
+source_len = len(source) 
+while (i < source_len): 
+    found = False
+    if (found != True and temp[i] in char): # i가 만약 구두점이고, found가 false이면 
+        found = True; # 일단 found를 true 저장
+        j = i + 1;
+        temp = temp[:i] + ' ' + temp[i+1:] # i에 구두점이 존재하면 i전부터 i이후까지 저장하게 한다.
+        if (j > source_len): # j값이 source의 크기보다 크면 
+            break # 중단
+        source_len = len(temp)
+    i = i + 1
+
+a = temp.split() # 단어만 현재 출력된것을 공백을 지우고 이를 a에 저장함
+
+remove_overlap = list(set(a)) # a를 리스트로 만들어서 저장
+
+dic = {}
+i = 0 
+for i in remove_overlap: # 리스트의 key값의 value를 0으로 초기화하는 for문
+    dic[i] = 0
+j = 0
+for j in a: # 중복되는 단어를 check하는 for문
+    dic[j] = dic[j] + 1
+
+dic_key = dic.keys() # key값만 따로 출력
+dic_value = dic.values() # value값만 따로 출력
+
+i = 0
+for i in range(0, len(dic)):  # 키값, value값 결과 출력
+    print dic_key[i] ,dic[dic_key[i]],
