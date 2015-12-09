@@ -1,0 +1,84 @@
+# -*- coding: utf-8  -*-
+import urllib
+import urllib2
+import re
+import codecs
+import sys
+ 
+def get_html(url):
+    # url을 열어 html 문서를 받아옵니다.
+    # 문서는 utf-8 인코딩입니다.
+    resp = urllib2.urlopen(url)
+    html = resp.read().decode('utf-8')
+ 
+    # 인코딩된 문서를 미리 저장하고, 저장된 문서를 이용합니다.
+    # 일일이 네트워크를 이용해 문서를 받고 싶지 않을 때 사용합니다.
+    # 적절히 주석으로 조절하세요.
+    with codecs.open('sample.html', 'w', 'utf-8') as f:
+        f.write(html)
+ 
+    #with codecs.open('sample.html', 'r', 'utf-8') as f:
+    #    html = f.read()
+ 
+    return html
+ 
+def extract_format_info(v_value):
+    # v_value는 동영상의 아이디입니다.
+    URL_BASE = 'http://www.youtube.com/watch?v='
+    url      = URL_BASE + v_value
+    html     = get_html(url)
+ 
+    # playerConfig의 모든 값을 가져옵니다.
+    t = re.search(r'yt.playerConfig = {(.+)};', html)
+    # print t.groups()[0]
+    # print
+ 
+    # 그 중 스트림 맵 부분만 추출해냅니다.
+    r = re.search(r'"url_encoded_fmt_stream_map": "(.+?)"', t.groups()[0].strip())
+ 
+    # 스트림맵은 CSV이므로 콤마로 분리합니다.
+    rawstrings = r.groups()[0].strip().split(',')
+    items      = []
+ 
+    for rawstring in rawstrings:
+        item = {}
+ 
+        # \uXXXX 부분을 실제 문자열로 변경합니다.
+        uniesc = rawstring.decode('unicode-escape')
+ 
+        # 실제 문자열로 변경된 부분 중 '&'기호가 있습니다.
+        # 이것은 재차 키=값 문자열을 분리하는 역할을 합니다.
+        for oneitem in uniesc.split('&'):
+            # 키와 값을 분리, 딕셔너리로 저장합니다.
+            key, val = oneitem.split('=')
+            item[key] = urllib.unquote(val.strip())
+ 
+        items.append(item)
+ 
+    # 값들을 프린트
+    #for item in items:
+    #    for it in item.items():
+    #        print it[0]+': '+it[1]
+    #    print
+ 
+    return items
+ 
+if __name__ == '__main__':
+    items  = extract_format_info(sys.argv[1])
+ 
+    # 동영상을 실제로 받아 봅니다. url과 sig 필드의 값이 필요합니다.
+    # 영상의 첫번째 항목을 열어 저장합니다.
+    url    = '%s&signature=%s' % (items[0]['url'], items[0]['sig'])
+ 
+    # 쿠키 등의 장치가 필요 없습니다. 단순히 열면 됩니다.
+    resp   = urllib2.urlopen(url)
+ 
+    # 수신 상태를 확인
+    print resp.info()
+ 
+    # 동영상의 인코딩 상태를 파악하여 다운로드 받는 것이 아니므로
+    # 동영상 파일의 확장자는 적절히 변경하세요.
+    f = open('result.flv', 'wb')
+    f.write(resp.read())
+    f.close()
+    resp.close()
