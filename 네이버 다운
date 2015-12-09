@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+from BeautifulSoup import BeautifulSoup
+import urllib2
+ 
+url="http://www.naver.com"
+ 
+page=urllib2.urlopen(url)
+soup = BeautifulSoup(page.read())
+ 
+# 'a' 태그 중에서 class 이름이 class_name 인 element 를 저장
+elements=soup.findAll('a',{'class':'class_name'})
+ 
+for element in elements:
+    print element['href']+","+ element.string
+    
+f = open("index.html", "w")
+f.write(str(soup))
