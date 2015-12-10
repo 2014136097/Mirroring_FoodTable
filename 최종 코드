@@ -4,6 +4,10 @@ import sys
 import urllib
 import BeautifulSoup
 
+*** 저희 코드 사용할려면 코드파일이랑 같은위치에   
+    https://www.dropbox.com/s/m307clu7k11fxsl/BeautifulSoup.zip?dl=0  
+    이 파일도 같이 있어야 합니다.  
+***  
 
 
 data  = urllib.urlopen('http://coop.koreatech.ac.kr/dining/menu.php')
